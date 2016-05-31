@@ -14,13 +14,15 @@ $ make
 ```
 
 # Running
+## Loading the database with random records
+* Key: A monotonically increasing integer, starting at 0
+* Value: An arbitrary UUID
 ```
 $ loaddb -n <num recs>
 ```
 
 # Verifying
-This step assumes you've installed the Aerospike tools via
-www.aerospike.com
+Assuming you've installed 1000000 records via loaddb:
 ```
 $ aql
 aql> select * from test.personas where pk=999999
