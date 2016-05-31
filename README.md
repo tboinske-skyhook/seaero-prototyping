@@ -1,6 +1,13 @@
 # seaero-prototyping
 Sandbox for testing Seastar and Aerospike platforms
 
+# Downloads
+## Aerospike 
+### Community Server Edition
+http://www.aerospike.com/download/server/3.8.2.3/
+### C Development Client
+http://www.aerospike.com/download/client/c/4.0.4/
+
 # Building
 ```
 $ make
