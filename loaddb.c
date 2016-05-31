@@ -1,7 +1,9 @@
 #include <ctype.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <uuid/uuid.h>
 
 #include <aerospike/aerospike.h>
 #include <aerospike/aerospike_key.h>
@@ -14,7 +16,7 @@ int main(int argc, char** argv)
     int numRecs = 0;
     int c = 0;
 
-    opterr = 0;
+    //opterr = 0;
 
     while ((c = getopt (argc, argv, "n:")) != -1)
     {
@@ -36,9 +38,7 @@ int main(int argc, char** argv)
     }
 
     printf("loading n=%d random records into DB...\n", numRecs);
-    return 0;
 
-    as_error err;
     as_config config;
     as_config_init(&config);
 
@@ -49,17 +49,34 @@ int main(int argc, char** argv)
     aerospike as;
     aerospike_init(&as, &config);
 
+    as_error err;
     aerospike_connect(&as, &err);
 
-    as_key key;
-    as_key_init(&key, "test", "silly_set", "test_key");
+    int i = 0;
 
-    as_record rec;
-    as_record_inita(&rec, 2);
-    as_record_set_int64(&rec, "test-bin-1", 1234);
-    as_record_set_str(&rec, "test-bin-2", "test-bin-2-data");
+    for (i = 0; i < numRecs; i++)
+    {
+        as_key key;
+        as_key_init_int64(&key, "test", "personas", i);
 
-    aerospike_key_put(&as, &err, NULL, &key, &rec);
+        // Create a UUID as a kind of stand in for persona data.
+        uuid_t uuid;
+        uuid_generate(uuid);
+
+        char ch[37];
+        uuid_unparse(uuid, ch);
+
+        as_record rec;
+        as_record_init(&rec, 1);
+        as_record_set_str(&rec, "persona", ch);
+
+        if (aerospike_key_put(&as, &err, NULL, &key, &rec) != AEROSPIKE_OK)
+        {
+            printf("error(%d) %s at [%s:%d]", err.code, err.message, err.file, err.line);
+        }
+
+        as_record_destroy(&rec);
+    }
 
     aerospike_close(&as, &err); 
     aerospike_destroy(&as);
